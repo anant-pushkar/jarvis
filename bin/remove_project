@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import os
+import datetime
+import json
+f=open(os.getenv("HOME")+"/Documents/Jarvis/config.json","r")
+config=json.load(f)
+f.close()
+response=str(raw_input("Are ypu sure you wish to completely delete this project?Enter y for yes : "))
+
+if response=="y":
+	t1=datetime.datetime.now()
+	print '\033[97m'
+	print "parsing project file"
+
+	f=open("project.json","r+")
+	j=json.load(f)
+	f.close()
+
+	print "Removing all files."
+	folder=os.environ['HOME']+"/"+config["workspace"]+"/"+str(j["type"])+"/"+str(j["name"])
+	cmd="rm -R "+folder
+	os.system("cd ..")
+	os.system(cmd)
+	os.system("exit")

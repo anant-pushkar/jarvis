@@ -1,0 +1,3 @@
+#!/bin/bash
+compile
+time python test_modules/director.py

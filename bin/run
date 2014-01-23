@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+import json
+import os
+import datetime
+
+print '\033[97m'
+print "parsing project file"
+
+f=open("project.json","r+")
+j=json.load(f)
+f.close()
+if str(j["run_script"])=="off":
+	f=open(os.getenv("HOME")+"/Documents/Jarvis/config.json")
+	config=json.load(f)
+	f.close()
+
+	check=False
+	for i in range(len(config["type"])):
+		if str(j["type"])==str(config["type"][i]["name"]):
+			check=True
+			break
+	if check:
+		cmd="./main"
+		print "running project"
+		print '\033[47m'
+		print '\033[30m'
+		t1=datetime.datetime.now()
+		os.system(cmd)
+		print '\033[0m'
+		print '\033[97m'
+		t2=datetime.datetime.now()
+		t=t2-t1
+		print "Total time elapsed : "+str(t.microseconds)+" microseconds"
+else:
+	print "Running custom compile script"
+	t1=datetime.datetime.now()
+	f=open(str(j["run_script"]))
+	print '\033[47m'
+	print '\033[30m'
+	cmd=str(f.read())
+	os.system(cmd)
+	print '\033[0m'
+	print '\033[97m'
+	t2=datetime.datetime.now()
+	t=t2-t1
+	print "Total time elapsed : "+str(t.microseconds)+" microseconds"

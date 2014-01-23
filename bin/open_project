@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+import os
+import datetime
+print '\033[97m'
+import json
+import readline
+import sys
+sys.path.insert(0,os.getenv("HOME")+"/Documents/Jarvis/")
+from prettytable import *
+f=open(os.getenv("HOME")+"/Documents/Jarvis/config.json","r")
+j=json.load(f)
+f.close()
+type_list=[]
+x = PrettyTable(["Type", "Description"])
+x.align["Description"] = "l"
+x.align["Type"] = "l"
+for i in range(len(j["type"])):
+	x.add_row([j["type"][i]["name"],j["type"][i]["description"]])
+	type_list.append(j["type"][i]["name"])
+print x
+def complete_type(text, state):
+    for cmd in type_list:
+        if cmd.startswith(text):
+            if not state:
+                return cmd
+            else:
+                state -= 1
+
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete_type)
+tp=str(raw_input("Enter Type : ")) 
+check=False
+for i in range(len(j["type"])):
+	if tp==j["type"][i]["name"]:
+		check=True
+		type_obj=j["type"][i]
+while not check:
+	readline.parse_and_bind("tab: complete")
+	readline.set_completer(complete_type)
+	tp  =str(raw_input("Project Type not recognized. Enter type     : "))
+	for i in range(len(j["type"])):
+		if tp==str(j["type"][i]["name"]):
+			check=True
+			type_obj=j["type"][i]
+			break
+t1=datetime.datetime.now()	
+folder=os.environ['HOME']+"/"+j["workspace"]+"/"+tp
+name_arr=os.listdir(folder)
+x = PrettyTable(["Project Name", "Description"])
+x.align["Description"] = "l"
+x.align["Project Name"] = "l"
+for name in name_arr:
+	f=open(folder+"/"+name+"/project.json","r")
+	prj=json.load(f)
+	f.close()
+	decs=str(prj["description"])
+	x.add_row([name,decs])
+print x
+COMMANDS =name_arr 
+
+def complete(text, state):
+    for cmd in COMMANDS:
+        if cmd.startswith(text):
+            if not state:
+                return cmd
+            else:
+                state -= 1
+
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete)
+
+name=str(raw_input("Enter name of project : "))
+home=folder+"/"+name
+while os.path.exists(home)==False:
+	name=str(raw_input("Enter name of project : "))
+	home=folder+"/"+name
+
+print "Moving to project location"
+os.system("gnome-terminal -t "+name+" --working-directory "+home)
+
+t2=datetime.datetime.now()
+t=t2-t1
+print "Total time elapsed : "+str(t.microseconds)+" microseconds"
+
+cmd=str(j["editor"])+" "+home+"/Main."+type_obj["ext"]+" "+home+"/test_modules/testCases.py"
+os.system(cmd)

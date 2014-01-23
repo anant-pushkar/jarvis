@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+import json
+import os
+import datetime
+import readline
+import sys
+sys.path.insert(0,os.getenv("HOME")+"/Documents/Jarvis/")
+from prettytable import *
+f=open(os.getenv("HOME")+"/Documents/Jarvis/config.json","r")
+j=json.load(f)
+f.close()
+author=str(j["author"])
+print '\033[97m'
+name=str(raw_input("Enter name     : "))
+name=name.replace(" ","_")
+type_list=[]
+x = PrettyTable(["Type", "Description"])
+x.align["Description"] = "l"
+x.align["Type"] = "l"
+for i in range(len(j["type"])):
+	x.add_row([j["type"][i]["name"],j["type"][i]["description"]])
+	type_list.append(j["type"][i]["name"])
+print x
+def complete_type(text, state):
+    for cmd in type_list:
+        if cmd.startswith(text):
+            if not state:
+                return cmd
+            else:
+                state -= 1
+
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete_type)
+tp  =str(raw_input("Enter type     : "))
+check=False
+for i in range(len(j["type"])):
+	if tp==str(j["type"][i]["name"]):
+		check=True
+		type_obj=j["type"][i]
+		break
+while not check:
+	tp  =str(raw_input("Project Type not recognized. Enter type     : "))
+	for i in range(len(j["type"])):
+		if tp==str(j["type"][i]["name"]):
+			check=True
+			type_obj=j["type"][i]
+			break
+cmt =str(raw_input("Enter comments : "))
+
+t1=datetime.datetime.now()
+folder=os.environ['HOME']+"/"+j["workspace"]+"/"+tp+"/"+name
+
+if os.path.exists(folder):
+	t2=datetime.datetime.now()
+	t=t2-t1
+	print "Total time elapsed : "+str(t.microseconds)+" microseconds"
+	
+	os.system("gnome-terminal -t "+name+" --working-directory "+folder)
+	
+	cmd=str(j["editor"])+" "+folder+"/Main."+type_obj["ext"]+" "+folder+"/test_modules/testCases.py"
+	os.system(cmd)
+else:
+	print "Creating directory"
+	cmd=" mkdir "+folder
+	os.system(cmd)
+
+	cmd="cp -R "+os.getenv("HOME")+"/Documents/Jarvis/test_modules "+folder
+	os.system(cmd)
+
+	print "Copying files"
+	f=open(os.getenv("HOME")+"/Documents/Jarvis/templates/template."+tp,"r+")
+	content=f.read();
+	f.close()
+
+	import time
+	content=content.replace("{date}",time.strftime("%c"))
+	content=content.replace("{name}",name)
+	content=content.replace("{comments}",cmt)
+	content=content.replace("{author}",author);
+
+	f=open(folder+"/Main."+type_obj["ext"],"w+")
+	f.write(content)
+	f.close()
+	
+	print "Creating project file"
+	js='{\n\t"name":"'+name+'" ,\n\t"description":"'+cmt+'" ,\n\t"type":"'+tp+'" ,\n\t"files":[\n\t\t{"name":"Main.'+type_obj["ext"]+'"}\n\t],\n\t"compile_script" : "off",\n\t"run_script" : "off",\n\t"debug_script" : "off"\n}'
+	f=open(folder+"/project.json","w+") 
+	f.write(js)
+	f.close()
+	
+	print "Moving to project location"
+	os.system("gnome-terminal -t "+name+" --working-directory "+folder)
+	
+	cmd=str(j["editor"])+" "+folder+"/Main."+type_obj["ext"]+" "+folder+"/test_modules/testCases.py"
+	os.system(cmd)
+	
+	t2=datetime.datetime.now()
+	t=t2-t1
+	print "Total time elapsed : "+str(t.microseconds)+" microseconds"

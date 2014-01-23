@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+import json
+import os
+import datetime
+
+t1=datetime.datetime.now()
+print '\033[97m'
+print "parsing project file"
+
+f=open("project.json","r+")
+j=json.load(f)
+f.close()
+if str(j["compile_script"])=="off":
+	f=open(os.getenv("HOME")+"/Documents/Jarvis/config.json")
+	config=json.load(f)
+	f.close()
+
+	check=False
+	for i in range(len(config["type"])):
+		if str(j["type"])==str(config["type"][i]["name"]):
+			check=True
+			compiler=config["type"][i]["compiler"]
+			arg=config["type"][i]["arg"]
+			break
+	if check:
+		print "Compiling"
+		cmd=""
+		for i  in range(len(j["files"])):
+			cmd=cmd+" "+ str(j["files"][i]["name"])
+
+		cmd=compiler+" "+cmd+" "+arg
+		cmd=cmd+" -o main"
+		os.system(cmd)
+		print "Compile complete"
+		t2=datetime.datetime.now()
+
+		t2=datetime.datetime.now()
+		t=t2-t1
+		print "Total time elapsed : "+str(t.microseconds)+" microseconds"
+	else:
+		print "Invalid Project type. Please correct project.json file in the project folder."
+else:
+	print "Running custom compile script"
+	f=open(str(j["compile_script"]))
+	cmd=str(f.read())
+	os.system(cmd)
+	t2=datetime.datetime.now()
+	t=t2-t1
+	print "Total time elapsed : "+str(t.microseconds)+" microseconds"
