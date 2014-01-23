@@ -1,4 +1,14 @@
 import testTemplate 
+'''
+
+class customTester(testInstance):
+	def __init__(self , inStr , outStr , dec):
+		testInstance.__init__(self , inStr , outStr , dec)
+	
+	def test(self,txt,ref):
+		#write test logic here
+
+'''
 def getTests():
 	tests = []
 	
