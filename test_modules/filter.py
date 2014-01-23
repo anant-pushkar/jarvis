@@ -57,12 +57,14 @@ def draw_graph(count,graph,is_directed, labels=None,ttl="Graph Viewer", graph_la
 
 def data_plot(count,arr,ttl="Data Plotter"):
 	f=plt.figure()
-	xs = np.arange(len(arr))
-	series1 = np.array(arr).astype(np.double)
-	s1mask = np.isfinite(series1)
+	for i in range(len(arr)):
+		a=arr[i]
+		xs = np.arange(len(a))
+		series1 = np.array(a).astype(np.double)
+		s1mask = np.isfinite(series1)
 
-	plt.plot(xs[s1mask], series1[s1mask], linestyle='-', marker='o')
-	plt.title(ttl)
+		plt.plot(xs[s1mask], series1[s1mask], linestyle='-', marker='o')
+		plt.title(ttl)
 	ax=f.add_subplot(111)
 	ax.plot()
 
@@ -98,7 +100,10 @@ def filter_input(line,count):
 	if j["type"]=="data":
 		arr=[]
 		for i in range(len(j["obj"])):
-			arr.append(float(j["obj"][i]))
+			b=[]
+			for a in j["obj"][i]:
+				b.append(float(a))
+			arr.append(b)
 		try:
 			data_plot(count,arr,str(j["name"]))
 		except:
